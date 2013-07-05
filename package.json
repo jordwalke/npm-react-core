@@ -1,0 +1,19 @@
+{
+  "name": "react-core",
+  "version": "0.4.0",
+  "description": "NPM module for Facebook's React Framework",
+  "main": "modules/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jordwalke/npm-react-core.git"
+  },
+  "homepage": "http://facebook.github.io/react/",
+  "keywords": [ "react", "core" ],
+  "author": {
+    "name": "Jordan Walke",
+    "email": "jordojw@gmail.com",
+    "url": "http://github.com/jordwalke"
+  },
+  "license": "MIT"
+}
+
