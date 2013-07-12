@@ -17,18 +17,16 @@
  */
 
 "use strict";
-
 var ReactEventEmitter = require("./ReactEventEmitter");
 var ReactInstanceHandles = require("./ReactInstanceHandles");
 var ReactEventTopLevelCallback = require("./ReactEventTopLevelCallback");
 var ReactID = require("./ReactID");
-
 var $ = require("./$");
 
-/** Mapping from reactRoot DOM ID to React component instance. */
+/** Mapping from reactRootID to React component instance. */
 var instanceByReactRootID = {};
 
-/** Mapping from reactRoot DOM ID to `container` nodes. */
+/** Mapping from reactRootID to `container` nodes. */
 var containersByReactRootID = {};
 
 /**
@@ -112,11 +110,13 @@ var ReactMount = {
       nextComponent,
       container,
       callback) {
-    var nextProps = nextComponent.props;
-    ReactMount.scrollMonitor(container, function() {
-      prevComponent.replaceProps(nextProps, callback);
-    });
-    return prevComponent;
+      var nextProps = nextComponent.props;
+
+      ReactMount.scrollMonitor(container, function() {
+        prevComponent.replaceProps(nextProps, callback);
+      });
+
+      return prevComponent;
   },
 
   /**
@@ -144,13 +144,15 @@ var ReactMount = {
       nextComponent,
       container,
       shouldReuseMarkup) {
-    var reactRootID = ReactMount._registerComponent(nextComponent, container);
-    nextComponent.mountComponentIntoNode(
-      reactRootID,
-      container,
-      shouldReuseMarkup
-    );
-    return nextComponent;
+      var reactRootID = ReactMount._registerComponent(nextComponent, container);
+
+      nextComponent.mountComponentIntoNode(
+        reactRootID,
+        container,
+        shouldReuseMarkup
+      );
+
+      return nextComponent;
   },
 
   /**
@@ -253,15 +255,17 @@ var ReactMount = {
    *                   `container`
    */
   unmountAndReleaseReactRootNode: function(container) {
-    var reactRootID = getReactRootID(container);
-    var component = instanceByReactRootID[reactRootID];
-    if (!component) {
-      return false;
-    }
-    component.unmountComponentFromNode(container);
-    delete instanceByReactRootID[reactRootID];
-    delete containersByReactRootID[reactRootID];
-    return true;
+      var reactRootID = getReactRootID(container);
+      var component = instanceByReactRootID[reactRootID];
+
+      if (!component) {
+        return false;
+      }
+
+      component.unmountComponentFromNode(container);
+      delete instanceByReactRootID[reactRootID];
+      delete containersByReactRootID[reactRootID];
+      return true;
   },
 
   /**
@@ -272,9 +276,9 @@ var ReactMount = {
    * @return {?DOMElement} DOM element that contains the `id`.
    */
   findReactContainerForID: function(id) {
-    var reatRootID = ReactInstanceHandles.getReactRootIDFromNodeID(id);
-    // TODO: Consider throwing if `id` is not a valid React element ID.
-    return containersByReactRootID[reatRootID];
+      var reactRootID = ReactInstanceHandles.getReactRootIDFromNodeID(id);
+      var container = containersByReactRootID[reactRootID];
+      return container;
   },
 
   /**

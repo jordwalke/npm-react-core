@@ -81,12 +81,12 @@ var ReactCompositeComponentInterface = {
   mixins: SpecPolicy.DEFINE_MANY,
 
   /**
-   * Definition of props for this component.
+   * Definition of prop types for this component.
    *
-   * @type {array}
+   * @type {object}
    * @optional
    */
-  props: SpecPolicy.DEFINE_ONCE,
+  propTypes: SpecPolicy.DEFINE_ONCE,
 
 
 
@@ -278,8 +278,8 @@ var RESERVED_SPEC_KEYS = {
       }
     }
   },
-  props: function(Constructor, props) {
-    Constructor.propDeclarations = props;
+  propTypes: function(Constructor, propTypes) {
+    Constructor.propTypes = propTypes;
   }
 };
 
@@ -563,7 +563,7 @@ var ReactCompositeComponentMixin = {
    * @protected
    */
   replaceState: function(completeState, callback) {
-    validateLifeCycleOnReplaceState.call(null, this);
+    validateLifeCycleOnReplaceState(this);
     this._pendingState = completeState;
     ReactUpdates.enqueueUpdate(this, callback);
   },
@@ -583,11 +583,11 @@ var ReactCompositeComponentMixin = {
         props[propName] = defaultProps[propName];
       }
     }
-    var propDeclarations = this.constructor.propDeclarations;
-    if (propDeclarations) {
+    var propTypes = this.constructor.propTypes;
+    if (propTypes) {
       var componentName = this.constructor.displayName;
-      for (propName in propDeclarations) {
-        var checkProp = propDeclarations[propName];
+      for (propName in propTypes) {
+        var checkProp = propTypes[propName];
         if (checkProp) {
           checkProp(props, propName, componentName);
         }
@@ -777,12 +777,14 @@ var ReactCompositeComponentMixin = {
    * @private
    */
   _bindAutoBindMethod: function(method) {
-    var component = this;
-    return function() {
-      return method.apply(component, arguments);
-    };
-  }
+      var component = this;
 
+      var boundMethod = function() {
+        return method.apply(component, arguments);
+      };
+
+      return boundMethod;
+  }
 };
 
 var ReactCompositeComponentBase = function() {};
@@ -818,6 +820,12 @@ var ReactCompositeComponent = {
     Constructor.prototype.constructor = Constructor;
     mixSpecIntoComponent(Constructor, spec);
     invariant(Constructor.prototype.render);
+    // Reduce time spent doing lookups by setting these on the prototype.
+    for (var methodName in ReactCompositeComponentInterface) {
+      if (!Constructor.prototype[methodName]) {
+        Constructor.prototype[methodName] = null;
+      }
+    }
 
     var ConvenienceConstructor = function(props, children) {
       var instance = new Constructor();
@@ -838,7 +846,7 @@ var ReactCompositeComponent = {
    * @public
    */
   autoBind: function(method) {
-    return method;
+      return method;
   }
 };
 

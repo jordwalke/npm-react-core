@@ -29,7 +29,13 @@ var dirtyComponents = [];
  * friends are batched such that components aren't updated unnecessarily.
  */
 function batchedUpdates(callback) {
-  invariant(!isBatchingUpdates);
+  if (isBatchingUpdates) {
+    // We're already executing in an environment where updates will be batched,
+    // so this is a no-op.
+    callback();
+    return;
+  }
+
   isBatchingUpdates = true;
 
   try {
